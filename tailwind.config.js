@@ -9,7 +9,11 @@ module.exports = {
     "./error.vue",
   ],
   theme: {
-    extend: {},
+    extend: {
+      minWidth: {
+        'screen': '100vw',
+      }
+    },
   },
   plugins: [],
 }

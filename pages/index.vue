@@ -4,9 +4,8 @@ const loading = ref(false);
 const crawldata = ref([]);
 const crawlUrl = async () => {
   loading.value = true;
-  crawldata.value = await $fetch("/api/qualweb?domain=" + url.value);
+  crawldata.value = await $fetch("/api/urlcrawl?domain=" + url.value);
   loading.value = false;
-  console.log(crawldata.value);
 };
 </script>
 
@@ -32,12 +31,16 @@ const crawlUrl = async () => {
       </form>
     </div>
     <div class="flex flex-row justify-center">
-    <ul>
-      <li v-for="(key, url) in crawldata" class="p-2 hover:cursor-pointer hover:bg-slate-600">
-        {{ url }}
-      </li>
-    </ul>
+      <ul>
+        <li
+          v-for="url in crawldata"
+          class="p-2 hover:cursor-pointer hover:bg-slate-600"
+        >
+          <NuxtLink :to="{ name: 'evaluate', state: { url } }">{{
+            url
+          }}</NuxtLink>
+        </li>
+      </ul>
     </div>
-    
   </main>
 </template>
