@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start": "npx puppeteer browsers install chrome & nuxt start",
     "dev": "nuxt dev --port 5500",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
