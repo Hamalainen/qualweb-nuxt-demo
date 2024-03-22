@@ -12,6 +12,9 @@ module.exports = {
     extend: {
       minWidth: {
         'screen': '100vw',
+      },
+      width:{
+        100: '64rem'
       }
     },
   },

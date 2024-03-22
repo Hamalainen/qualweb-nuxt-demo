@@ -3,7 +3,10 @@ import { onMounted } from "vue";
 
 const loading = ref(false);
 const evaluateData = ref();
-
+const showAct = ref(false);
+const showWcag = ref(false);
+const showBp = ref(false);
+const url = history.state.url;
 onMounted(async () => {
   loading.value = true;
   const url = history.state.url;
@@ -15,96 +18,90 @@ onMounted(async () => {
   console.log(evaluateData.value);
   loading.value = false;
 });
+const handleAct = () => {
+  showAct.value = !showAct.value;
+};
+const handleWcag = () => {
+  showWcag.value = !showWcag.value;
+};
+const handleBp = () => {
+  showBp.value = !showBp.value;
+};
+const generateEarl = async () => {
+  const result = await $fetch("/api/generateearl", {
+    method: "post",
+    body: { reports: evaluateData.value },
+  });
+
+  var a = document.createElement("a");
+  var json = JSON.stringify(result.reports, null, 4)
+  const blob = new Blob([json], { type: "octet/stream" }),
+    downloadUrl = window.URL.createObjectURL(blob);
+  a.href = downloadUrl;
+  a.download = `${url}.json`;
+  a.click();
+};
 </script>
 
 <template>
-  <main class="flex flex-row justify-center">
-    <div class="flex flex-col gap-8 justify-center" v-if="evaluateData">
-      <h1 class="text-4xl">Summary</h1>
-      <p>{{ evaluateData.system.url.completeUrl }}</p>
-      <div>
-        <p>
-          {{
-            evaluateData.metadata.passed +
-            evaluateData.metadata.failed +
-            evaluateData.metadata.warning +
-            evaluateData.metadata.inapplicable
-          }}
-          tested rules
-        </p>
-        <div class="flex flex-row gap-8">
-          <p>passed {{ evaluateData.metadata.passed }}</p>
-          <p>failed {{ evaluateData.metadata.failed }}</p>
-          <p>warning {{ evaluateData.metadata.warning }}</p>
-          <p>inapplicable {{ evaluateData.metadata.inapplicable }}</p>
-        </div>
+  <main class="flex flex-col gap-8 justify-center" v-if="evaluateData">
+    <h1 class="text-4xl">Summary</h1>
+    <p>{{ evaluateData.system.url.completeUrl }}</p>
+    <div>
+      <p>
+        {{
+          evaluateData.metadata.passed +
+          evaluateData.metadata.failed +
+          evaluateData.metadata.warning +
+          evaluateData.metadata.inapplicable
+        }}
+        tested rules
+      </p>
+      <div class="flex flex-row gap-8">
+        <p>passed {{ evaluateData.metadata.passed }}</p>
+        <p>failed {{ evaluateData.metadata.failed }}</p>
+        <p>warning {{ evaluateData.metadata.warning }}</p>
+        <p>inapplicable {{ evaluateData.metadata.inapplicable }}</p>
       </div>
+    </div>
+    <div>
+      <div class="flex flex-row justify-between mb-4">
+        <h2 class="text-3xl mb-4">Evaluation report</h2>
+        <button class="bg-slate-200 text-slate-900 p-4" @click="generateEarl">Generate EARL report</button>
+      </div>
+
       <div class="flex flex-col gap-4">
-        <h2 class="text-3xl">Evaluation report</h2>
-        <div v-for="rule in evaluateData.modules[`act-rules`].assertions">
-          <div class="bg-slate-800 p-4" v-if="rule.results.length > 0">
-            <div class="flex flex-row justify-between">
-              <h3 class="text-2xl">{{ rule.name }}</h3>
-              <p class="text-2xl">{{ rule.code.substring(3) }}</p>
-            </div>
+        <div class="bg-slate-600 p-4">
+          <button class="w-full" @click="handleAct">
+            <h3 class="text-3xl mb-4">ACT rules</h3>
+          </button>
 
-            <div>
-              <div class="flex flex-col gap-4">
-                <div>
-                  <p>Description</p>
-                  <p>{{ rule.description }}</p>
-                  <p>{{ rule.metadata.url }}</p>
-                </div>
+          <RuleEvaluateComponent
+            v-if="showAct"
+            :rules="evaluateData.modules[`act-rules`]"
+          />
+        </div>
 
-                <p>Target element {{ rule.metadata.target.element }}</p>
-                <p v-if="rule.metadata.target.attributes">
-                  Target attributes {{ rule.metadata.target.attributes }}
-                </p>
-              </div>
+        <div class="bg-slate-600 p-4">
+          <button class="w-full" @click="handleWcag">
+            <h3 class="text-3xl mb-4">WCAG techniques</h3>
+          </button>
 
-              <h3
-                v-if="rule.metadata[`success-criteria`].length > 0"
-                class="text-2xl mt-4"
-              >
-                Success criteria
-              </h3>
-              <ul>
-                <li v-for="criteria in rule.metadata[`success-criteria`]">
-                  <p>
-                    {{ criteria.name }} - {{ criteria.principle }} Level
-                    {{ criteria.level }}
-                  </p>
-                </li>
-              </ul>
-              <div class="p-8">
-                <h3 class="text-2xl">Results</h3>
-                <p v-if="rule.metadata.passed">
-                  Passed {{ rule.metadata.passed }} results
-                </p>
-                <p v-if="rule.metadata.failed">
-                  Failed {{ rule.metadata.failed }} results
-                </p>
-                <p v-if="rule.metadata.warning">
-                  Warning {{ rule.metadata.warning }} results
-                </p>
-                <p v-if="rule.metadata.inapplicable">
-                  Inapplicable {{ rule.metadata.inapplicable }} results
-                </p>
-                <div class="p-4 h-72 overflow-auto flex flex-col gap-4 border">
-                  <div
-                    class="border p-4 flex flex-col gap-2"
-                    v-for="result in rule.results"
-                  >
-                    <h4 class="text-xl">{{ result.description }}</h4>
-                    <pre class="bg-slate-700">{{
-                      result.elements[0].htmlCode.substring(0, 100)
-                    }}</pre>
-                    <p>{{ result.elements[0].pointer }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <RuleEvaluateComponent
+            v-if="showWcag"
+            :rules="evaluateData.modules[`wcag-techniques`]"
+          />
+        </div>
+
+        <div class="bg-slate-600 p-4">
+          <button class="w-full" @click="handleBp">
+            <h3 class="text-3xl mb-4">Best practices</h3>
+          </button>
+
+          <RuleEvaluateComponent
+            v-if="showBp"
+            :rules="evaluateData.modules[`best-practices`]"
+          />
         </div>
       </div>
     </div>
