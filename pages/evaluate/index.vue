@@ -15,7 +15,6 @@ onMounted(async () => {
   ).then((res) => {
     return res[url];
   });
-  console.log(evaluateData.value);
   loading.value = false;
 });
 const handleAct = () => {
