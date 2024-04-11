@@ -1,4 +1,6 @@
 <script setup lang="ts">
+ 
+ const router = useRouter()
 const url = ref("");
 const loading = ref(false);
 const crawldata = ref([]);
@@ -7,6 +9,7 @@ const crawlUrl = async () => {
   crawldata.value = await $fetch("/api/urlcrawl?domain=" + url.value);
   loading.value = false;
 };
+
 </script>
 
 <template>
@@ -27,6 +30,14 @@ const crawlUrl = async () => {
           type="submit"
         >
           Crawl
+        </button>
+        <button
+          class="bg-slate-900 p-4"
+          :disabled="loading"
+          @click.prevent="() => {router.push({ name: 'evaluate', state: { url } })}"
+          type="submit"
+        >
+          Evaluate
         </button>
       </form>
     </div>
