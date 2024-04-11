@@ -12,7 +12,7 @@ import { QualWeb, generateEARLReport } from '@qualweb/core';
     const qualweb = new QualWeb(plugins);
 
     const clusterOptions = {
-      maxConcurrency: 5, // Performs several urls evaluations at the same time - the higher the number given, more resources will be used. Default value = 1
+      maxConcurrency: 1, // Performs several urls evaluations at the same time - the higher the number given, more resources will be used. Default value = 1
       timeout: 60 * 1000, // Timeout for loading page. Default value = 30 seconds
       monitor: true // Displays urls information on the terminal. Default value = false
     };
